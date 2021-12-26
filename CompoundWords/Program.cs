@@ -41,9 +41,9 @@ namespace CompoundWords
 
         }
 
-        public static string SomeAlgoritm(string[] dict, string[] original)
+        public static string SomeAlgoritm(string[] dict, string original)
         {
-            return null;
+            return string.Empty;
         }
 
     }
