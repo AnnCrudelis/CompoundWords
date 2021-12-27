@@ -34,10 +34,10 @@ namespace CompoundWords
                 Task<string[]> originalFile = Task.Run(() => File.ReadAllLinesAsync(originalFilePath));
                 dictionary.Wait();
                 originalFile.Wait();
-                Console.WriteLine(originalFile.IsCompleted);
+
                 for (int i = 0; i < originalFile.Result.Length; i++)
                 {
-                    Console.WriteLine(SplitWord(dictionary.Result,originalFile.Result[i]));
+                    Console.WriteLine(GetSplitedWord(dictionary.Result,originalFile.Result[i]));
                 }
             }
             catch (Exception ex)
@@ -47,10 +47,8 @@ namespace CompoundWords
 
         }
 
-        public static string SplitWord(string[] dict, string original)
+        public static string GetSplitedWord(string[] dict, string original)
         {
-            //TODO: метод разбивает всего на 2 составные части. Необходимо, чтобы он мог разбивать на большее количество частей, если это возможно
-            //TODO: но учитывать условие из тз: "При реализации алгоритма, следует брать из словаря, максимально “длинное” слово, насколько это возможно."
             List<string> lexemes = new List<string> { };
             original = original.ToLower();
             for (int i = 0; i < dict.Length; i++)
@@ -64,22 +62,34 @@ namespace CompoundWords
 
             if (lexemes != null)
             {
-                List<string> list = new List<string>();
-                foreach (string lexeme in lexemes)
-                {
-                    var pair1 = lexemes?.Where(x => x + lexeme == original).FirstOrDefault();
-                    if(pair1 != null)
-                    {
-                        list.Add(pair1 + " " + lexeme);
-                    }
-                }
-                if(list?.Count > 0)
-                {
-                    return list.FirstOrDefault();
-                }
+                return SplitIntoLexeme(lexemes, original);
             }
             return original;
         }
 
+        private static string SplitIntoLexeme(List<string> lexemes, string original)
+        {
+            List<string> startsWithLexemes = lexemes.Where(x => original.StartsWith(x) && x != original).OrderByDescending(x => x.Length).ToList();
+            List<string> endsWithLexemes = lexemes.Where(x => !startsWithLexemes.Contains(x) && x != original).OrderByDescending(x => x.Length).ToList();
+
+            foreach (var startsWithLexeme in startsWithLexemes)
+            {
+                var residueLexemes = endsWithLexemes.Where(x => x.Length <= original.Length - startsWithLexeme.Length).OrderByDescending(x => x.Length).ToList();
+                foreach (var residue in residueLexemes)
+                {
+                    if (startsWithLexeme + residue == original)
+                    {
+                        return startsWithLexeme + " " + residue;
+                    }
+                    else if (original.StartsWith(startsWithLexeme + residue))
+                    {
+                        string result = SplitIntoLexeme(residueLexemes, original.Remove(0, (startsWithLexeme + residue).Length));
+                        if (lexemes.Contains(result))
+                            return startsWithLexeme + " " + residue + " " + result;
+                    }
+                }
+            }
+            return original;
+        }
     }
 }
