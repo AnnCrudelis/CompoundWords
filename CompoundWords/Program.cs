@@ -25,9 +25,9 @@ namespace CompoundWords
                 if (string.IsNullOrEmpty(resultFilePath.Trim()))
                 {
                     resultFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\" + DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH'-'mm'-'ss") + ".tsv";
-                    if (!File.Exists(resultFilePath))
+                    using (FileStream fs = File.Create(resultFilePath))
                     {
-                        FileStream fs = File.Create(resultFilePath);
+                        Console.WriteLine("Файл был создан на вашем рабочем столе");
                     }
                 }
 
@@ -35,10 +35,18 @@ namespace CompoundWords
                 dictionary.Wait();
                 originalFile.Wait();
 
+                List<string> result = new List<string>();
+
                 for (int i = 0; i < originalFile.Result.Length; i++)
                 {
-                    Console.WriteLine(GetSplitedWord(dictionary.Result,originalFile.Result[i]));
+                    result.Add(GetSplitedWord(dictionary.Result, originalFile.Result[i]));
                 }
+                Task resultTask = Task.Run(() => File.WriteAllLinesAsync(resultFilePath, result));
+                while (!resultTask.IsCompleted)
+                {
+                    Console.WriteLine("Обработка...");
+                }
+                Console.WriteLine("Обработка завершена");
             }
             catch (Exception ex)
             {

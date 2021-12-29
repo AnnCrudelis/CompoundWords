@@ -12,7 +12,7 @@ namespace UnitTestWords
         public void TestNotAllowedToSplit()
         {
             string original = "Psychologie";
-            var result = Program.SplitWord(dictionary, original);
+            var result = Program.GetSplitedWord(dictionary, original);
             Assert.Equal("psychologie", result.ToLower());
         }
 
@@ -20,7 +20,7 @@ namespace UnitTestWords
         public void TestAllowedToSplit()
         {
             string original = "Krankenhaus";
-            var result = Program.SplitWord(dictionary, original);
+            var result = Program.GetSplitedWord(dictionary, original);
             Assert.Equal("kranken haus", result.ToLower());
         }
 
@@ -28,7 +28,7 @@ namespace UnitTestWords
         public void TestWrongAllowedToSplit()
         {
             string original = "Krankenhaus";
-            var result = Program.SplitWord(dictionary, original);
+            var result = Program.GetSplitedWord(dictionary, original);
             Assert.NotEqual("krank en haus ", result.ToLower());
         }
 
@@ -36,7 +36,7 @@ namespace UnitTestWords
         public void TestNotInDictionary()
         {
             string original = "123";
-            var result = Program.SplitWord(dictionary, original);
+            var result = Program.GetSplitedWord(dictionary, original);
             Assert.Equal("123", result.ToLower());
         }
 
@@ -44,7 +44,7 @@ namespace UnitTestWords
         public void TestIsEmpty()
         {
             string original = "";
-            var result = Program.SplitWord(dictionary, original);
+            var result = Program.GetSplitedWord(dictionary, original);
             Assert.Equal("", result.ToLower());
         }
 
@@ -52,16 +52,24 @@ namespace UnitTestWords
         public void TestAlreadySplited()
         {
             string original = "Farn Fasan";
-            var result = Program.SplitWord(dictionary, original);
+            var result = Program.GetSplitedWord(dictionary, original);
             Assert.Equal("farn fasan", result.ToLower());
+        }
+
+        [Fact]
+        public void TestIsNotMultiWord()
+        {
+            string original = "Kranken haus";
+            var result = Program.GetSplitedWord(dictionary, original);
+            Assert.NotEqual("krank en haus", result.ToLower());
         }
 
         [Fact]
         public void TestIsMultiWord()
         {
-            string original = "Kranken haus";
-            var result = Program.SplitWord(dictionary, original);
-            Assert.NotEqual("krank en haus", result.ToLower());
+            string original = "aalballaals";
+            var result = Program.GetSplitedWord(dictionary, original);
+            Assert.Equal("aal ball aals", result.ToLower());
         }
     }
 }
